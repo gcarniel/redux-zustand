@@ -2,14 +2,17 @@ import { MessageCircle } from 'lucide-react'
 import { Header } from '../components/Header'
 import { Video } from '../components/Video'
 import { Module } from '../components/Module'
-import { useAppDispatch, useAppSelector } from '../store'
 import { useEffect } from 'react'
-import { loadCourse, useCurrentLesson } from '../store/slices/player'
+import { useCurrentLesson, useStore } from '../zustand-store'
 
 export function Player() {
-  const dispatch = useAppDispatch()
-  const modules = useAppSelector((state) => state.player.course?.modules)
-  const isCourseLoading = useAppSelector((state) => state.player.isLoading)
+  const { load, course, isLoading } = useStore((store) => {
+    return {
+      load: store.load,
+      course: store.course,
+      isLoading: store.isLoading,
+    }
+  })
 
   const { currentLesson } = useCurrentLesson()
 
@@ -18,7 +21,7 @@ export function Player() {
   }, [currentLesson])
 
   useEffect(() => {
-    dispatch(loadCourse())
+    load()
   }, [])
 
   return (
@@ -41,7 +44,7 @@ export function Player() {
             className={`w-80 absolute bottom-0 top-0 right-0 border-l border-zinc-800 bg-zinc-900 divide-y-2
                       divide-zinc-900 overflow-y-scroll scrollbar-thin scrollbar-track-zinc-950 scrollbar-thumb-zinc-700`}
           >
-            {isCourseLoading && (
+            {isLoading && (
               <div className="flex animate-pulse flex-row items-center h-full justify-center space-x-5">
                 <div className="flex flex-col space-y-3">
                   {Array(8)
@@ -57,9 +60,9 @@ export function Player() {
                 </div>
               </div>
             )}
-            {!isCourseLoading &&
-              modules &&
-              modules.map((module, index) => {
+            {!isLoading &&
+              course?.modules &&
+              course?.modules.map((module, index) => {
                 return (
                   <Module
                     key={module.id}
